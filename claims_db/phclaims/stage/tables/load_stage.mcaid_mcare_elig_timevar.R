@@ -351,17 +351,26 @@
       timevar[, enroll_type := NULL] # kept until now for comparison with the dual flag
       timevar <- timevar[!(mcare==0 & mcaid==0)]
       
-    # Create full_criteria flag (slightly different for mcaid-only tables) ----
+    # Create full_criteria flag (varies by time period and ) ----
       timevar[, full_criteria := 0]
       timevar[mcaid == 1 & mcare == 0 & dual == 0 & full_benefit == 1 & tpl != 1, full_criteria := 1]
       timevar[, y1114 := 0 ] # create flag for whether in 2011:2014 (years without partial data)
-      timevar[from_date %in% c(as.numeric(as.Date("2011-01-01")) : as.numeric(as.Date("2014-12-31"))), y1114 := 1] 
       timevar[to_date %in% c(as.numeric(as.Date("2011-01-01")) : as.numeric(as.Date("2014-12-31"))), y1114 := 1] 
-      timevar[y1114 == 1 & mcaid==0 & mcare==1 & (part_a==1 | part_b == 1), full_criteria := 1]
-      timevar[y1114 == 0 & mcaid==0 & mcare==1 & (part_a==1 | part_b == 1) & partial==0, full_criteria := 1]
-      timevar[y1114 == 1 & apde_dual == 1 & (full_benefit == 1 &  tpl != 1) | ((part_a==1 | part_b == 1)), full_criteria := 1]
-      timevar[y1114 == 0 & apde_dual == 1 & ((full_benefit == 1 &  tpl != 1) | ((part_a==1 | part_b == 1) & partial==0)), full_criteria := 1]
-      timevar[, y1114:=NULL]
+      timevar[, y1117 := 0]
+      timevar[to_date %in% c(as.numeric(as.Date("2011-01-01")) : as.numeric(as.Date("2017-12-31"))), y1117 := 1] 
+
+      # 2011-2014      
+      timevar[y1114 == 1 & apde_dual == 1 & ((full_benefit == 1 &  tpl != 1) | (part_a==1 & part_b == 1)), full_criteria := 1]
+      timevar[y1114 == 1 & mcaid==0 & mcare==1 & (part_a==1 &  part_b == 1), full_criteria := 1]      
+      
+      #2015-2017
+      timevar[y1114 == 0 & y1117 == 1 & mcaid==0 & mcare==1 & part_a==1 & part_b == 1 & partial==0, full_criteria := 1]
+      timevar[y1114 == 0 & y1117 == 1 & apde_dual == 1 & ((full_benefit == 1 &  tpl != 1) | (part_a==1 & part_b == 1 & partial==0)), full_criteria := 1]
+      
+      # 2018+
+      timevar[y1114 == 0 & y1117 == 0 & mcaid==1 & full_benefit == 1 &  tpl != 1 & dual != 1, full_criteria := 1]
+      
+      timevar[, c("y1114", "y1117") :=NULL]
       
     # Set Mcare related NULLs to zero when only Mcaid data exists ----
       timevar[mcare == 0 & is.na(part_a), part_a := 0]
