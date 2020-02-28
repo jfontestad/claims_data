@@ -365,7 +365,9 @@
       
       #2015-2017
       timevar[y1114 == 0 & y1117 == 1 & mcaid==0 & mcare==1 & part_a==1 & part_b == 1 & partial==0, full_criteria := 1]
+      timevar[y1114 == 0 & y1117 == 1 & mcaid==0 & mcare==1 & part_a==1 & part_b == 1 & is.na(partial), full_criteria := NA]
       timevar[y1114 == 0 & y1117 == 1 & apde_dual == 1 & ((full_benefit == 1 &  tpl != 1) | (part_a==1 & part_b == 1 & partial==0)), full_criteria := 1]
+      timevar[y1114 == 0 & y1117 == 1 & apde_dual == 1 & part_a==1 & part_b == 1 & is.na(partial), full_criteria := NA] # 
       
       # 2018+
       timevar[y1114 == 0 & y1117 == 0 & mcaid==1 & full_benefit == 1 &  tpl != 1 & dual != 1, full_criteria := 1]
